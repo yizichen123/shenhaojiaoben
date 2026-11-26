@@ -4774,6 +4774,11 @@ function autoCharacterFinance(record,context){
       if (isUnk(pickApp('瞳色'))) miss.push('瞳色');
       var pC = cur['私密档案'] || {}, pA = arc['私密档案'] || {};
       var pickP = function (k) { return !isUnk(pC[k]) ? pC[k] : pA[k]; };
+      if (isUnk(pickP('婚恋状态'))) miss.push('婚恋状态');
+      if (isUnk(pickP('是否为处女'))) miss.push('是否为处女');
+      if (isUnk(pickP('避孕手段'))) miss.push('避孕手段');
+      if (isUnk(pickP('内射态度'))) miss.push('内射态度');
+      if (isUnk(pickP('生育意愿'))) miss.push('生育意愿');
       if (miss.length) out.push({ name: name, fields: miss });
     });
     var actM = stat['当前在场互动男性'] && typeof stat['当前在场互动男性'] === 'object' ? stat['当前在场互动男性'] : {};

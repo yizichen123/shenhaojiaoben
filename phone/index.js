@@ -1004,7 +1004,6 @@ var DEFAULT_CHAR_DISCUSS_PROMPT = "你是一位资深人设编辑，正在和作
     var s = String(rawName == null ? '' : rawName).trim();
     if (!s) return false;
     var base = s.replace(/[（(].*?[）)]/g, '').trim();
-    if (s === '徐朵朵' || base === '徐朵朵' || s === '朵朵' || base === '朵朵') return false;
     if (typeof isCurrentChatTongrenEnabled === 'function' && !isCurrentChatTongrenEnabled()) return false;
     if (TONGREN_AUTO_EXCLUDE_SET[s] || (base && TONGREN_AUTO_EXCLUDE_SET[base])) return true;
     return false;
@@ -4365,13 +4364,6 @@ function autoCharacterFinance(record,context){
       return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
     };
   }
-  function shnMingqiIsAdult(ageStr, name) {
-    if (String(name || '').trim() === '徐朵朵') return false;
-    var s = String(ageStr || '').trim();
-    var m = s.match(/(\d{1,3})/);
-    if (m && Number(m[1]) < 18) return false;
-    return true;
-  }
   function shnMingqiFindEntry(part, itemName) {
     var list = MINGQI_DICT[part] || [];
     for (var i = 0; i < list.length; i++) {
@@ -4458,7 +4450,6 @@ function autoCharacterFinance(record,context){
     return excludePart === '屄' ? '胸' : '屄';
   }
   function shnMingqiRoll(seedKey, beautyScore, ageStr, name) {
-    if (!shnMingqiIsAdult(ageStr, name)) return null;
     var score = Number(beautyScore);
     if (!Number.isFinite(score) || score <= 0) score = 80;
     var rand = shnMingqiPrng(String(seedKey || 'seed'));
@@ -4681,7 +4672,6 @@ function autoCharacterFinance(record,context){
       Object.keys(actF).forEach(function (name) {
         var cur = actF[name] || {}, arc = arcF[name] || {};
         var age = cur.年龄 || arc.年龄 || '';
-        if (!shnMingqiIsAdult(age, name)) return;
         var existing = (arc.私密档案 && arc.私密档案.名器) || (cur.私密档案 && cur.私密档案.名器) || cache[name];
         if (!existing || typeof existing !== 'object' || !existing.品质) {
           var beauty = Number(cur.颜值评分 || arc.颜值评分 || 80);
@@ -4728,7 +4718,6 @@ function autoCharacterFinance(record,context){
           return p.名器;
         }
         var age = (roleObj && roleObj.年龄) || '';
-        if (!shnMingqiIsAdult(age, name)) return null;
         var rolled = shnMingqiRoll(shnMingqiChatKey() + '::' + name, Number((roleObj && roleObj.颜值评分) || 80), age, name);
         if (rolled) {
           cache[name] = rolled;
@@ -4785,16 +4774,6 @@ function autoCharacterFinance(record,context){
       if (isUnk(pickApp('瞳色'))) miss.push('瞳色');
       var pC = cur['私密档案'] || {}, pA = arc['私密档案'] || {};
       var pickP = function (k) { return !isUnk(pC[k]) ? pC[k] : pA[k]; };
-      var ageStr = String(pick('年龄') || '');
-      var mAge = ageStr.match(/(\d{1,3})/);
-      var adult = !(mAge && Number(mAge[1]) < 18);
-      if (adult) {
-        if (isUnk(pickP('婚恋状态'))) miss.push('婚恋状态');
-        if (isUnk(pickP('是否为处女'))) miss.push('是否为处女');
-        if (isUnk(pickP('避孕手段'))) miss.push('避孕手段');
-        if (isUnk(pickP('内射态度'))) miss.push('内射态度');
-        if (isUnk(pickP('生育意愿'))) miss.push('生育意愿');
-      }
       if (miss.length) out.push({ name: name, fields: miss });
     });
     var actM = stat['当前在场互动男性'] && typeof stat['当前在场互动男性'] === 'object' ? stat['当前在场互动男性'] : {};
